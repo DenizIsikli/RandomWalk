@@ -1,0 +1,6 @@
+# compiled binary
+RandomWalk
+
+# optional: all binaries
+*.out
+*.exe
