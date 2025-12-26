@@ -15,6 +15,11 @@ struct Agent {
 void reset_agents(void* data) {
     auto* agents = static_cast<std::vector<Agent>*>(data);
     agents->clear();
+
+    SDL_SetRenderDrawColor(SDL_GetRenderer(SDL_GetWindowFromID(1)), 20, 20, 20, 255);
+    SDL_RenderClear(SDL_GetRenderer(SDL_GetWindowFromID(1)));
+    SDL_RenderPresent(SDL_GetRenderer(SDL_GetWindowFromID(1)));
+
     for (int i = 0; i < AGENTS_COUNT; i++) {
         agents->push_back({
             WINDOW_WIDTH/2 + (rand()%21 - 10),
@@ -93,13 +98,10 @@ int main() {
             }
 
             SDL_SetRenderDrawColor(renderer, agent.color.r, agent.color.g, agent.color.b, agent.color.a);
-            SDL_RenderDrawLine(renderer, oldX-1, oldY-1, agent.x+1, agent.y+1);
-            // SDL_RenderDrawLine(renderer, oldX+1, oldY-1, agent.x-1, agent.y+1);
             SDL_RenderDrawLine(renderer, oldX, oldY, agent.x, agent.y);
         }
 
         SDL_RenderPresent(renderer);
-        SDL_Delay(1);
     }
 
     SDL_DestroyRenderer(renderer);
