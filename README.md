@@ -8,12 +8,18 @@ A simple SDL2 + C++ simulation of multiple agents performing a **random walk**, 
 
 ## Compile
 
+```bash
 g++ RandomWalk.cpp -std=c++17 -O2 `sdl2-config --cflags --libs` -o RandomWalk
+```
 
 ## Run
 
+```bash
 # Normal interactive mode
 ./RandomWalk
+```
 
+```bash
 # FFmpeg capture mode (GIF)
 ./RandomWalk ffmpeg | ffmpeg -f rawvideo -pixel_format rgba -video_size 800x600 -framerate 60 -i - RandomWalk.gif
+```
