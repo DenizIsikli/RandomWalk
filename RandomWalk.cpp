@@ -156,7 +156,6 @@ void RandomWalkFfmpeg() {
             SDL_PIXELFORMAT_RGBA32,
             pixels.data(),
             WINDOW_WIDTH * 4
-
         );
 
         write(STDOUT_FILENO, pixels.data(), pixels.size());
