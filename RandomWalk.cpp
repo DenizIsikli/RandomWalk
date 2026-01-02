@@ -1,9 +1,12 @@
 #include <bits/stdc++.h>
 #include <SDL2/SDL.h>
+#include <unistd.h>
 
 #define AGENTS_COUNT 200
 #define WINDOW_WIDTH 800
 #define WINDOW_HEIGHT 600
+#define FPS 60
+#define RECORD_SECONDS 10
 
 struct Agent {
     int x, y;
@@ -62,51 +65,57 @@ int main() {
         });
     }
 
-    bool running = true;
+    std::vector<uint8_t> pixels(WINDOW_WIDTH * WINDOW_HEIGHT * 4);
 
-    while(running) {
+    const int total_frames = FPS * RECORD_SECONDS;
+    for (int frame = 0; frame < total_frames; frame++) {
         SDL_Event event;
-        while(SDL_PollEvent(&event)) {
-            if (event.type == SDL_QUIT) running = false;
-
-            if (event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_r) {
-                reset_agents(&agents);
-            }
+        while (SDL_PollEvent(&event)) {
+            if (event.type == SDL_QUIT) frame = total_frames;
         }
 
-        for(auto&agent:agents) {
-            int oldX = agent.x;
-            int oldY = agent.y;
+        for (auto& agent : agents) {
+            int ox = agent.x, oy = agent.y;
 
-            switch(agent.direction) {
-                case 0: agent.y -= 1; break; // Up
-                case 1: agent.x += 1; break; // Right
-                case 2: agent.y += 1; break; // Down
-                case 3: agent.x -= 1; break; // Left
+            switch (agent.direction) {
+                case 0: agent.y--; break;
+                case 1: agent.x++; break;
+                case 2: agent.y++; break;
+                case 3: agent.x--; break;
             }
 
-            if(agent.y >= WINDOW_HEIGHT) agent.direction = 0;
-            if(agent.x < 0) agent.direction = 1;
-            if(agent.y < 0) agent.direction = 2;
-            if(agent.x >= WINDOW_WIDTH) agent.direction = 3;
+            if (agent.x < 0) agent.direction = 1;
+            if (agent.x >= WINDOW_WIDTH) agent.direction = 3;
+            if (agent.y < 0) agent.direction = 2;
+            if (agent.y >= WINDOW_HEIGHT) agent.direction = 0;
 
-            agent.direction_steps++;
-
-            if(agent.direction_steps >= 25) {
+            if (++agent.direction_steps >= 25) {
                 agent.direction = rand() % 4;
                 agent.direction_steps = 0;
             }
 
-            SDL_SetRenderDrawColor(renderer, agent.color.r, agent.color.g, agent.color.b, agent.color.a);
-            SDL_RenderDrawLine(renderer, oldX, oldY, agent.x, agent.y);
+
+            SDL_SetRenderDrawColor(renderer, agent.color.r, agent.color.g, agent.color.b, 255);
+            SDL_RenderDrawLine(renderer, ox, oy, agent.x, agent.y);
         }
 
         SDL_RenderPresent(renderer);
+
+
+        SDL_RenderReadPixels(
+            renderer,
+            nullptr,
+            SDL_PIXELFORMAT_RGBA32,
+            pixels.data(),
+            WINDOW_WIDTH * 4
+        );
+
+        write(STDOUT_FILENO, pixels.data(), pixels.size());
+
+        SDL_Delay(1000 / FPS);
     }
 
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
     SDL_Quit();
 }
-
-
